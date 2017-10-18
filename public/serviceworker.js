@@ -74,7 +74,7 @@ self.addEventListener('fetch', function(event) {
           return caches.match(event.request);
         });
       })
-    )
+    );
   // Handle request for images
   } else if (requestURL.pathname.startsWith('/img/event-')) {
     event.respondWith(
@@ -100,6 +100,23 @@ self.addEventListener('fetch', function(event) {
         caches.open(CACHE_NAME).then(function(cache) {
           return cache.match(event.request).then(function(response) {
             return response || fetch(event.request);
+          });
+        })
+      );
+    } else if (requestURL.pathname === "/my-account") {
+      event.respondWith(
+        caches.match("/my-account.html").then(function(response) {
+          return response || fetch("/my-account.html");
+        })
+      );
+    } else if (requestURL.pathname === "/reservations.json") {
+      event.respondWith(
+        caches.open(CACHE_NAME).then(function(cache) {
+          return fetch(event.request).then(function(networkResponse) {
+            cache.put(event.request, networkResponse.clone());
+            return networkResponse;
+          }).catch(function() {
+            return caches.match(event.request);
           });
         })
       );
