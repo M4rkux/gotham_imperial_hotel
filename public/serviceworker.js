@@ -38,7 +38,7 @@ self.addEventListener('install', function (event) {
 });
 
 self.addEventListener('fetch', function(event) {
-  var requestURL = new URL(event.request.URL);
+  var requestURL = new URL(event.request.url);
   // Handle requests for index.html
   if (requestURL.pathname === '/' || requestURL.pathname === '/index.html') {
     event.respondWith(
