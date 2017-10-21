@@ -1,3 +1,5 @@
+importScripts("/js/reservations-store.js");
+
 var CACHE_NAME = 'gih-cache-v5';
 var CACHED_URLS = [
   // Our HTML
@@ -10,6 +12,7 @@ var CACHED_URLS = [
   'https://code.jquery.com/jquery-3.0.0.min.js',
   '/js/app.js',
   '/js/offline-map.js',
+  '/js/reservations-store.js',
   // Images
   '/img/logo.png',
   '/img/logo-header.png',
