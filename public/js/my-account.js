@@ -35,6 +35,50 @@ var checkUnconfirmedReservations = function() {
   });
 };
 
+var urlBase64ToUint8Array = function(base64String) {
+  var padding = "=".repeat((4 - base64String.length % 4) % 4);
+  var base64 = (base64String + padding).replace(/\-/g, "+").replace(/_/g, "/");
+  var rawData = window.atob(base64);
+  var outputArray = new Uint8Array(rawData.length);
+  for (var i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+  return outputArray;
+};
+
+var subscribeUserToNotifications = function() {
+  Notification.requestPermission().then(function(permission){
+    if (permission === "granted") {
+      var subscribeOptions = {
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(
+          "BBHkedpqqsO3qHlytWpgjkMAH_-u7jjLmbVsaDrWMTLBfcv7HC8l6ic_ofX6K_OUBse3dVVfHcsQ7VzJN0xLXDA" // Replace with your public key
+        )
+      };
+      navigator.serviceWorker.ready.then(function(registration) {
+        return registration.pushManager.subscribe(subscribeOptions);
+      }).then(function(subscription) {
+        var fetchOptions = {
+          method: "post",
+          headers: new Headers({
+            "Content-Type": "application/json"
+          }),
+          body: JSON.stringify(subscription)
+        };
+        return fetch("/add-subscription", fetchOptions);
+      });
+    }
+  });
+};
+
+var offerNotification = function() {
+  if ("Notification" in window &&
+      "PushManager" in window &&
+      "serviceWorker" in navigator) {
+    subscribeUserToNotifications();
+  }
+};
+
 // Adds a reservation as pending to the DOM, and try to contact server to book it.
 var addReservation = function(id, arrivalDate, nights, guests) {
   var reservationDetails = {
@@ -55,6 +99,7 @@ var addReservation = function(id, arrivalDate, nights, guests) {
       updateReservationDisplay(data);
     });
   }
+  offerNotification();
 };
 
 
