@@ -1,9 +1,11 @@
 importScripts("/js/reservations-store.js");
+importScripts("/js/vendor/progressive-ui-kitt/progressive-ui-kitt-sw-helper.js");
 
-var CACHE_NAME = 'gih-cache-v5';
+var CACHE_NAME = 'gih-cache-v6';
 var CACHED_URLS = [
   // Our HTML
   '/index.html',
+  'my-account',
   // Stylesheets
   '/css/gih.css',
   'https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css',
@@ -13,6 +15,8 @@ var CACHED_URLS = [
   '/js/app.js',
   '/js/offline-map.js',
   '/js/reservations-store.js',
+  '/js/vendor/progressive-ui-kitt/themes/flat.css',
+  '/js/vendor/progressive-ui-kitt/progressive-ui-kitt.js',
   // Images
   '/img/logo.png',
   '/img/logo-header.png',
@@ -67,17 +71,21 @@ self.addEventListener('fetch', function(event) {
       })
     );
   // Handle Events from JSON file
-  } else if (requestURL.pathname === '/events.json') {
-    event.respondWith(
-      caches.open(CACHE_NAME).then(function (cache) {
-        return fetch(event.request).then(function(networkResponse) {
-          cache.put(event.request, networkResponse.clone());
-          return networkResponse;
-        }).catch(function () {
-          return caches.match(event.request);
-        });
-      })
-    );
+} else if (requestURL.pathname === "/events.json") {
+  event.respondWith(
+    caches.open(CACHE_NAME).then(function(cache) {
+      return fetch(event.request).then(function(networkResponse) {
+        cache.put(event.request, networkResponse.clone());
+        return networkResponse;
+      }).catch(function() {
+        ProgressiveKITT.addAlert(
+          "You are currently offline."+
+          "The content of this page may be out of date."
+        );
+        return caches.match(event.request);
+      });
+    })
+  );
   // Handle request for images
   } else if (requestURL.pathname.startsWith('/img/event-')) {
     event.respondWith(
